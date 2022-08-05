@@ -15,11 +15,13 @@ dependencies {
     api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
+    api("org.msgpack", "msgpack", Versions.msgpackVersion)
 }
 
 // present on all platforms
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
+provided("com.ayou", "ProtocolSupportCustomPacket", "1.1.0")
 
 relocate("org.bstats")
 

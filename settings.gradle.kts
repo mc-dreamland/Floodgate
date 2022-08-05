@@ -30,6 +30,10 @@ dependencyResolutionManagement {
             mavenContent { releasesOnly() }
         }
 
+        maven("http://lnexus.bjd-mc.com:8081/repository/maven-public/") {
+            isAllowInsecureProtocol = true
+        }
+
         mavenCentral()
 
         maven("https://jitpack.io") {

@@ -34,6 +34,7 @@ object Versions {
     const val snakeyamlVersion = "1.28"
     const val cloudVersion = "1.5.0"
     const val bstatsVersion = "3.0.0"
+    const val msgpackVersion = "0.6.12"
 
     const val javaWebsocketVersion = "1.5.2"
 
