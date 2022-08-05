@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 import org.geysermc.floodgate.pluginmessage.channel.FormChannel;
+import org.geysermc.floodgate.pluginmessage.channel.NeteaseCustomChannel;
 import org.geysermc.floodgate.pluginmessage.channel.PacketChannel;
 import org.geysermc.floodgate.pluginmessage.channel.SkinChannel;
 import org.geysermc.floodgate.pluginmessage.channel.TransferChannel;
@@ -64,4 +65,12 @@ public final class PluginMessageModule extends AbstractModule {
     public PluginMessageChannel packetChannel() {
         return new PacketChannel();
     }
+
+    @Singleton
+    @ProvidesIntoSet
+    public PluginMessageChannel neteaseCustomChannel() {
+        return neteaseCustomChannel;
+    }
+
+    public static NeteaseCustomChannel neteaseCustomChannel = new NeteaseCustomChannel();
 }
