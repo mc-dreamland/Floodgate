@@ -26,9 +26,9 @@
 package org.geysermc.floodgate;
 
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.zaxxer.hikari.HikariDataSource;
-import java.sql.SQLException;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.config.FloodgateConfig;
@@ -42,10 +42,8 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 
 public final class BungeePlugin extends Plugin {
     private FloodgatePlatform platform;
-    private String url;
-    private String user;
-    private String pass;
     private static HikariDataSource dataSource;
+    @Inject private FloodgateConfig config;
 
     public static HikariDataSource getDataSource() {
         return dataSource;
@@ -69,9 +67,6 @@ public final class BungeePlugin extends Plugin {
         injector.getInstance(FloodgateLogger.class)
                 .translatedInfo("floodgate.core.finish", endCtm - ctm);
 
-        url  = injector.getInstance(FloodgateConfig.class).getMysqlUrl();
-        user = injector.getInstance(FloodgateConfig.class).getMysqluser();
-        pass = injector.getInstance(FloodgateConfig.class).getMysqlpass();
 
     }
 
@@ -84,14 +79,7 @@ public final class BungeePlugin extends Plugin {
                 new PluginMessageModule()
         );
 
-        (dataSource = new HikariDataSource()).setJdbcUrl(url);
-        dataSource.setUsername(user);
-        dataSource.setPassword(pass);
-        try {
-            dataSource.getConnection().close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        dataSource = platform.getDatasource();
 
     }
 

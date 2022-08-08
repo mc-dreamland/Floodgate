@@ -51,7 +51,7 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
 
     private boolean debug;
     private int configVersion;
-    private String mysqlUrl;
+    private String mysqlurl;
     private String mysqluser;
     private String mysqlpass;
 
