@@ -27,48 +27,29 @@ package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.ayou.protocolsupportcustompacket.event.NeteaseReciveCustomPacketEvent;
 import com.google.gson.Gson;
-import com.google.inject.Inject;
-import java.io.IOException;
 import java.lang.reflect.Type;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
-import org.geysermc.floodgate.api.UnsafeFloodgateApi;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
-import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.floodgate.SpigotPlugin;
 import org.msgpack.MessagePack;
 import org.msgpack.type.ArrayValue;
 import org.msgpack.type.MapValue;
 import org.msgpack.type.Value;
 import org.msgpack.type.ValueType;
 
-public class NeteaseCustomChannel implements PluginMessageChannel {
-    @Inject private PluginMessageUtils pluginMessageUtils;
+@RequiredArgsConstructor
+public class SpigotNeteaseCustomChannel extends NeteaseCustomChannel{
+    private final JavaPlugin plugin;
     private static final Gson gson = new Gson();
+
 
     @Override
     public String getIdentifier() {
         return "floodgate:netease";
-    }
-
-    @Override
-    public Result handleProxyCall(
-            byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
-            UUID sourceUuid,
-            String sourceUsername,
-            Identity sourceIdentity) {
-        if (sourceIdentity == Identity.SERVER) {
-            // send it to the client
-            return Result.forward();
-        }
-        if (sourceIdentity == Identity.PLAYER) {
-            return Result.forward();
-        }
-
-        return Result.handled();
     }
 
     @Override
@@ -107,14 +88,4 @@ public class NeteaseCustomChannel implements PluginMessageChannel {
         return Result.handled();
     }
 
-    public boolean sendPacket(UUID player, byte[] packet, UnsafeFloodgateApi api) {
-        if (api == null) {
-            throw new IllegalArgumentException("Can only send a packet using the unsafe api");
-        }
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
-    }
-
-    public boolean sendPacket(UUID player, byte[] packet) {
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
-    }
 }

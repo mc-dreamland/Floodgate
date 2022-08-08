@@ -106,7 +106,8 @@ public class Utils {
     }
 
     public static UUID getJavaUuid(String xuid) {
-        return getJavaUuid(Long.parseLong(xuid));
+        return UUID.fromString("00000000-0000-4000-8000-0000" + xuid);
+//        return getJavaUuid(Long.parseLong(xuid));
     }
 
     public static boolean isUniquePrefix(String prefix) {

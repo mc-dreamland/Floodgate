@@ -27,19 +27,12 @@ package org.geysermc.floodgate.pluginmessage.channel;
 
 import com.google.gson.Gson;
 import com.google.inject.Inject;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.UUID;
 import org.geysermc.floodgate.api.UnsafeFloodgateApi;
 import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
-import org.msgpack.MessagePack;
-import org.msgpack.type.ArrayValue;
-import org.msgpack.type.MapValue;
-import org.msgpack.type.Value;
-import org.msgpack.type.ValueType;
 
-public final class NeteaseCustomChannel implements PluginMessageChannel {
+public class NeteaseCustomChannel implements PluginMessageChannel {
     @Inject private PluginMessageUtils pluginMessageUtils;
     private static final Gson gson = new Gson();
 
@@ -57,27 +50,12 @@ public final class NeteaseCustomChannel implements PluginMessageChannel {
             UUID sourceUuid,
             String sourceUsername,
             Identity sourceIdentity) {
-
-//        MessagePack messagePack = new MessagePack();
-//        try {
-//            Value originJson = messagePack.read(data);
-//            Value unConvert = messagePack.unconvert("value");
-//            if (!originJson.getType().equals(ValueType.MAP)) return Result.handled();
-//            MapValue mapValue = originJson.asMapValue();
-//            ArrayValue values = mapValue.get(unConvert).asArrayValue();
-//            if (!values.get(0).toString().equals("\"ModEventC2S\"") && !values.get(0).toString().equals("\"ModEventS2C\"")) return Result.handled();
-//            ArrayValue packData = values.get(1).asMapValue().get(unConvert).asArrayValue();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         if (sourceIdentity == Identity.SERVER) {
             // send it to the client
             return Result.forward();
         }
         if (sourceIdentity == Identity.PLAYER) {
             return Result.forward();
-
-//            return handleServerCall(data, targetUuid, targetUsername);
         }
 
         return Result.handled();
@@ -89,11 +67,14 @@ public final class NeteaseCustomChannel implements PluginMessageChannel {
     }
 
 
-
     public boolean sendPacket(UUID player, byte[] packet, UnsafeFloodgateApi api) {
         if (api == null) {
             throw new IllegalArgumentException("Can only send a packet using the unsafe api");
         }
+        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
+    }
+
+    public boolean sendPacket(UUID player, byte[] packet) {
         return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
     }
 }
