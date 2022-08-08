@@ -22,6 +22,7 @@ dependencies {
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
 provided("com.ayou", "ProtocolSupportCustomPacket", "1.1.0")
+provided("com.zaxxer", "HikariCP", "4.0.3")
 
 relocate("org.bstats")
 
