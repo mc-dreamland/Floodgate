@@ -25,18 +25,15 @@
 
 package org.geysermc.floodgate.pluginmessage.channel;
 
-import com.google.inject.Inject;
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import java.util.UUID;
-import org.geysermc.floodgate.api.UnsafeFloodgateApi;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
-public class NeteaseCustomChannel implements PluginMessageChannel {
-    @Inject private PluginMessageUtils pluginMessageUtils;
-
+public class CustomChannel implements PluginMessageChannel {
     @Override
     public String getIdentifier() {
-        return "floodgate:netease";
+        return "floodgate:custom";
     }
 
     @Override
@@ -47,7 +44,9 @@ public class NeteaseCustomChannel implements PluginMessageChannel {
             Identity targetIdentity,
             UUID sourceUuid,
             String sourceUsername,
-            Identity sourceIdentity) {
+            Identity sourceIdentity
+    ) {
+
         if (sourceIdentity == Identity.SERVER) {
             // send it to the client
             return Result.forward();
@@ -56,23 +55,15 @@ public class NeteaseCustomChannel implements PluginMessageChannel {
             return Result.forward();
         }
 
+
+
+        // TODO
         return Result.handled();
     }
 
     @Override
-    public Result handleServerCall(byte[] data, UUID player_uuid, String player_name) {
-        return Result.handled();
-    }
-
-
-    public boolean sendPacket(UUID player, byte[] packet, UnsafeFloodgateApi api) {
-        if (api == null) {
-            throw new IllegalArgumentException("Can only send a packet using the unsafe api");
-        }
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
-    }
-
-    public boolean sendPacket(UUID player, byte[] packet) {
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
+    public Result handleServerCall(byte[] data, UUID targetUuid, String targetUsername) {
+        // TODO
+        return null;
     }
 }

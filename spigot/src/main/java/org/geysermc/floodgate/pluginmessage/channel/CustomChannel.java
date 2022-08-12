@@ -25,54 +25,45 @@
 
 package org.geysermc.floodgate.pluginmessage.channel;
 
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import java.util.UUID;
-import org.geysermc.floodgate.api.UnsafeFloodgateApi;
-import org.geysermc.floodgate.platform.pluginmessage.PluginMessageUtils;
+import org.bukkit.Bukkit;
+import org.geysermc.floodgate.api.events.ClientPlayerInitializedEvent;
+import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.pluginmessage.PluginMessageChannel;
 
-public class NeteaseCustomChannel implements PluginMessageChannel {
-    @Inject private PluginMessageUtils pluginMessageUtils;
+public class CustomChannel implements PluginMessageChannel {
+    @Inject private FloodgateLogger logger;
 
     @Override
     public String getIdentifier() {
-        return "floodgate:netease";
+        return "floodgate:custom";
     }
 
     @Override
-    public Result handleProxyCall(
-            byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
-            UUID sourceUuid,
-            String sourceUsername,
-            Identity sourceIdentity) {
-        if (sourceIdentity == Identity.SERVER) {
-            // send it to the client
-            return Result.forward();
-        }
-        if (sourceIdentity == Identity.PLAYER) {
-            return Result.forward();
-        }
-
-        return Result.handled();
+    public Result handleProxyCall(byte[] data, UUID targetUuid, String targetUsername,
+                                  Identity targetIdentity, UUID sourceUuid, String sourceUsername,
+                                  Identity sourceIdentity) {
+        return null;
     }
 
     @Override
     public Result handleServerCall(byte[] data, UUID player_uuid, String player_name) {
+        ByteArrayDataInput in = ByteStreams.newDataInput(data);
+        int packetId = in.readInt();
+        String packetType = in.readUTF();
+
+        logger.debug("Receive CustomChannel Data: PacketId=" + packetId + " PacketType=" + packetType);
+
+        if (packetId == 113) {
+            long runtimeId = in.readLong();
+            ClientPlayerInitializedEvent clientPlayerInitializedEvent = new ClientPlayerInitializedEvent(
+                    player_uuid, runtimeId);
+            Bukkit.getServer().getPluginManager().callEvent(clientPlayerInitializedEvent);
+        }
         return Result.handled();
     }
 
-
-    public boolean sendPacket(UUID player, byte[] packet, UnsafeFloodgateApi api) {
-        if (api == null) {
-            throw new IllegalArgumentException("Can only send a packet using the unsafe api");
-        }
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
-    }
-
-    public boolean sendPacket(UUID player, byte[] packet) {
-        return pluginMessageUtils.sendMessage(player, getIdentifier(), packet);
-    }
 }
