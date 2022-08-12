@@ -16,13 +16,15 @@ dependencies {
     api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
     api("org.msgpack", "msgpack", Versions.msgpackVersion)
+    api("com.zaxxer", "HikariCP", "4.0.3")
 }
 
 // present on all platforms
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
 provided("com.ayou", "ProtocolSupportCustomPacket", "1.1.0")
-provided("com.zaxxer", "HikariCP", "4.0.3")
+
+relocate("com.zaxxer")
 
 relocate("org.bstats")
 
