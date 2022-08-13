@@ -5,5 +5,9 @@
 # You'll get kicked if you don't use the plugin. The default value is false because of it
 send-floodgate-data: false
 
+mysqlurl: jdbc:mysql://netease-db-02.i5mc.com/main_core
+mysqluser: root
+mysqlpass: msj
+
 >>|
 >>*

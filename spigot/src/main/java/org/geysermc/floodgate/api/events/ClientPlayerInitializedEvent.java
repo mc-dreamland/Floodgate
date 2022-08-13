@@ -1,5 +1,6 @@
 package org.geysermc.floodgate.api.events;
 
+import java.util.HashMap;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,19 +9,34 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.msgpack.type.Value;
 
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
 @ToString
+@NoArgsConstructor
 public class ClientPlayerInitializedEvent extends Event {
-	@Getter
-	private static final HandlerList handlerList = new HandlerList();
+	private static final HandlerList handlerList;
 
-	private UUID uuid;
+	static {
+		handlerList = new HandlerList();
+	}
+
+	private UUID player_uuid;
 	private long runtimeId;
+
+
+	public ClientPlayerInitializedEvent(UUID player_uuid, long runtimeId) {
+		this.player_uuid = player_uuid;
+		this.runtimeId = runtimeId;
+	}
 
 	@Override
 	public HandlerList getHandlers() {
+		return handlerList;
+	}
+
+
+	public static HandlerList getHandlerList() {
 		return handlerList;
 	}
 }

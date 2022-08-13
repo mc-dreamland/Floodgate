@@ -29,11 +29,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
-import com.zaxxer.hikari.HikariDataSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.UUID;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.InstanceHolder;
@@ -106,20 +104,14 @@ public class FloodgatePlatform {
         guice.getInstance(NewsChecker.class).start();
     }
 
-
-    public HikariDataSource getDatasource() {
-        HikariDataSource hikariDataSource = new HikariDataSource();
-
-        hikariDataSource.setJdbcUrl(config.getMysqlurl());
-        hikariDataSource.setUsername(config.getMysqluser());
-        hikariDataSource.setPassword(config.getMysqlpass());
-        try {
-            hikariDataSource.getConnection().close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return hikariDataSource;
+    public String getMysqlurl() {
+        return config.getMysqlurl();
+    }
+    public String getMysqluser() {
+        return config.getMysqluser();
+    }
+    public String getMysqlpass() {
+        return config.getMysqlpass();
     }
 
     public boolean enable(Module... postInitializeModules) {

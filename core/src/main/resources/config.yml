@@ -8,10 +8,6 @@ key-file-name: key.pem
 # It is recommended to use a prefix that does not contain alphanumerical to avoid the possibility of duplicate usernames.
 username-prefix: "."
 
-mysqlurl: jdbc:mysql://netease-db-02.i5mc.com/main_core
-mysqluser: root
-mysqlpass: msj
-
 # Should spaces be replaced with '_' in bedrock usernames?
 replace-spaces: true
 
