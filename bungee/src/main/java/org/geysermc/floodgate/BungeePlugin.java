@@ -78,16 +78,19 @@ public final class BungeePlugin extends Plugin {
         );
 
 
-        dataSource = new HikariDataSource();
+        if (platform.isForceUserName()) {
+            dataSource = new HikariDataSource();
 
-        dataSource.setJdbcUrl(platform.getMysqlurl());
-        dataSource.setUsername(platform.getMysqluser());
-        dataSource.setPassword(platform.getMysqlpass());
-        try {
-            dataSource.getConnection().close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            dataSource.setJdbcUrl(platform.getMysqlurl());
+            dataSource.setUsername(platform.getMysqluser());
+            dataSource.setPassword(platform.getMysqlpass());
+            try {
+                dataSource.getConnection().close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
         }
+
     }
 
     @Override
