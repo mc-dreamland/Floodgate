@@ -106,7 +106,12 @@ public class Utils {
     }
 
     public static UUID getJavaUuid(String xuid) {
-        return UUID.fromString("00000000-0000-4000-8000-0000" + xuid);
+//        return UUID.fromString("00000000-0000-4000-8000-0000" + xuid);
+        if (xuid.length() > 8) {
+            return UUID.fromString(xuid);
+        } else {
+            return UUID.fromString("00000000-0000-4000-8000-0000" + xuid);
+        }
 //        return getJavaUuid(Long.parseLong(xuid));
     }
 

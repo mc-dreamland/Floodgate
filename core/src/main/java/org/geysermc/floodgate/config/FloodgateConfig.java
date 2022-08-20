@@ -54,7 +54,7 @@ public class FloodgateConfig implements GenericPostInitializeCallback<ConfigLoad
     private String mysqlurl;
     private String mysqluser;
     private String mysqlpass;
-    private boolean forceUserName;
+    private boolean forceusername;
 
 
     private Key key;

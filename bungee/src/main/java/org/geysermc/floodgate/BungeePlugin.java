@@ -77,7 +77,6 @@ public final class BungeePlugin extends Plugin {
                 new PluginMessageModule()
         );
 
-
         if (platform.isForceUserName()) {
             dataSource = new HikariDataSource();
 

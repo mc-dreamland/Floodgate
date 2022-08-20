@@ -114,7 +114,7 @@ public class FloodgatePlatform {
         return config.getMysqlpass();
     }
     public boolean isForceUserName() {
-        return config.isForceUserName();
+        return config.isForceusername();
     }
 
     public boolean enable(Module... postInitializeModules) {
