@@ -22,10 +22,10 @@ dependencies {
 // present on all platforms
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
-provided("com.ayou", "ProtocolSupportCustomPacket", "1.1.0")
 
 
 relocate("org.bstats")
+relocate("org.msgpack")
 
 configure<BlossomExtension> {
     val constantsFile = "src/main/java/org/geysermc/floodgate/util/Constants.java"

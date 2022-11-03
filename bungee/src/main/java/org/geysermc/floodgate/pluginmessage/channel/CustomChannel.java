@@ -57,7 +57,7 @@ public class CustomChannel implements PluginMessageChannel {
         if (packetId == 113) {
             long runtimeId = in.readLong();
             ClientPlayerInitializedEvent clientPlayerInitializedEvent = new ClientPlayerInitializedEvent(
-                    targetUuid, runtimeId);
+                    sourceUuid, runtimeId);
             BungeeCord.getInstance().getPluginManager().callEvent(clientPlayerInitializedEvent);
         }
 

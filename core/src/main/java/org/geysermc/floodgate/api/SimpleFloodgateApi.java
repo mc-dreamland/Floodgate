@@ -79,7 +79,7 @@ public class SimpleFloodgateApi implements FloodgateApi {
 
     @Override
     public boolean isFloodgatePlayer(UUID uuid) {
-        return getPlayer(uuid) != null;
+        return getPlayer(uuid) != null || uuid.toString().contains("00000000-0000-4000-8000");
     }
 
     @Override
