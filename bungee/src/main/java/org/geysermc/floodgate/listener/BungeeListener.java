@@ -43,12 +43,14 @@ import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import net.md_5.bungee.netty.ChannelWrapper;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.skin.SkinApplier;
 import org.geysermc.floodgate.skin.SkinData;
+import org.geysermc.floodgate.util.BungeeRenameUtil;
 import org.geysermc.floodgate.util.LanguageManager;
 import org.geysermc.floodgate.util.ReflectionUtils;
 
@@ -81,6 +83,21 @@ public final class BungeeListener implements Listener {
     private AttributeKey<String> kickMessageAttribute;
 
     @EventHandler(priority = EventPriority.LOWEST)
+    public void onLoginEvent(LoginEvent event) {
+
+        PendingConnection connection = event.getConnection();
+        boolean floodgatePlayer = FloodgateApi.getInstance().isFloodgatePlayer(
+                event.getConnection().getUniqueId());
+        if (config.isForceusername()) {
+            if (floodgatePlayer) {
+                return;
+            }
+            String rename = BungeeRenameUtil.lookupName(connection.getUniqueId(), connection.getName(),"pc");
+            ReflectionUtils.setValue(connection, PLAYER_NAME, rename);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
         // well, no reason to check if the player will be kicked anyway
         if (event.isCancelled()) {
@@ -101,11 +118,21 @@ public final class BungeeListener implements Listener {
         }
 
         FloodgatePlayer player = channel.attr(playerAttribute).get();
+
+
         if (player != null) {
             connection.setOnlineMode(false);
             connection.setUniqueId(player.getCorrectUniqueId());
-            ReflectionUtils.setValue(connection, PLAYER_NAME, player.getCorrectUsername());
+            String rename = player.getCorrectUsername();
+            if (config.isForceusername()) {
+                int usernameLength = Math.min(event.getConnection().getName().length(), 16 - 3);
+                String relName = rename.substring(0, usernameLength);
+                rename = BungeeRenameUtil.lookupName(event.getConnection().getUniqueId(), relName,"pe");
+                ReflectionUtils.setValue(connection, PLAYER_NAME, rename);
+            }
+            ReflectionUtils.setValue(connection, PLAYER_NAME, rename);
         }
+
     }
 
     @EventHandler
