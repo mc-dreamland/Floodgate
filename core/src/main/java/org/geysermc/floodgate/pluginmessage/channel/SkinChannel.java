@@ -60,7 +60,7 @@ public class SkinChannel implements PluginMessageChannel {
 
         // we can only get skins from Geyser (client)
         if (sourceIdentity == Identity.PLAYER) {
-            Result result = handleServerCall(data, targetUuid, targetUsername);
+            Result result = handleServerCall(data, sourceUuid, sourceUsername);
             // aka translate 'handled' into 'forward' when send-floodgate-data is enabled
             if (!result.isAllowed() && result.getReason() == null) {
                 if (config.isProxy() && ((ProxyFloodgateConfig) config).isSendFloodgateData()) {

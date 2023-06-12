@@ -90,7 +90,7 @@ public class BungeeRenameUtil {
                     ++count;
                     int usernameLength = Math.min(nameBp.length(), 16 - 3);
                     String relName = nameBp.substring(0, usernameLength);
-                    mod = relName + ("#" + count);
+                    mod = relName + ("_" + count);
                 }
             } finally {
                 if (Collections.singletonList(sql).get(0) != null) {
