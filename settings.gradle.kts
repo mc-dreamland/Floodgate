@@ -31,7 +31,7 @@ dependencyResolutionManagement {
             mavenContent { releasesOnly() }
         }
 
-        maven("http://lnexus.bjd-mc.com:8081/repository/maven-public/") {
+        maven("https://nexus.bjd-mc.com:8081/repository/maven-public/") {
             isAllowInsecureProtocol = true
         }
 
