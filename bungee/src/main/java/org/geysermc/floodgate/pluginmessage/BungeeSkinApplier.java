@@ -47,12 +47,12 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 
 @RequiredArgsConstructor
 public final class BungeeSkinApplier implements SkinApplier {
-    private static final Constructor<?> LOGIN_RESULT_CONSTRUCTOR;
-    private static final Field LOGIN_RESULT_FIELD;
-    private static final Method SET_PROPERTIES_METHOD;
+    public static final Constructor<?> LOGIN_RESULT_CONSTRUCTOR;
+    public static final Field LOGIN_RESULT_FIELD;
+    public static final Method SET_PROPERTIES_METHOD;
 
-    private static final Class<?> PROPERTY_CLASS;
-    private static final Constructor<?> PROPERTY_CONSTRUCTOR;
+    public static final Class<?> PROPERTY_CLASS;
+    public static final Constructor<?> PROPERTY_CONSTRUCTOR;
 
     static {
         PROPERTY_CLASS = ReflectionUtils.getClassOrFallbackPrefixed(
