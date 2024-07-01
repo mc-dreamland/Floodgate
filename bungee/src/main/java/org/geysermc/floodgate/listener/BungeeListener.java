@@ -48,8 +48,8 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.ProxyFloodgateApi;
 import org.geysermc.floodgate.api.logger.FloodgateLogger;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.config.ProxyFloodgateConfig;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.util.BungeeRenameUtil;
 import org.geysermc.floodgate.skin.SkinDataImpl;
 import org.geysermc.floodgate.util.LanguageManager;
@@ -70,6 +70,7 @@ public final class BungeeListener implements Listener {
         checkNotNull(PLAYER_NAME, "Initial name field cannot be null");
     }
 
+    @Inject private ProxyFloodgateConfig config;
     @Inject private Plugin plugin;
     @Inject private ProxyFloodgateApi api;
     @Inject private LanguageManager languageManager;
@@ -122,8 +123,6 @@ public final class BungeeListener implements Listener {
         }
 
         FloodgatePlayer player = channel.attr(playerAttribute).get();
-
-
         if (player != null) {
             connection.setOnlineMode(false);
             connection.setUniqueId(player.getCorrectUniqueId());

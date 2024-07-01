@@ -17,14 +17,8 @@ dependencies {
     api("org.java-websocket", "Java-WebSocket", Versions.javaWebsocketVersion)
     api("org.incendo", "cloud-core", Versions.cloudCore)
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
-    api("cloud.commandframework", "cloud-core", Versions.cloudVersion)
-    api("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
-    api("org.bstats", "bstats-base", Versions.bstatsVersion)
     api("org.msgpack", "msgpack", Versions.msgpackVersion)
     api("com.zaxxer", "HikariCP", "4.0.3")
-
-    //todo use official dependency once https://github.com/Bastian/bstats-metrics/pull/118 is merged
-    api("com.github.Konicai.bstats-metrics", "bstats-base", Versions.bstatsVersion)
 }
 
 // present on all platforms

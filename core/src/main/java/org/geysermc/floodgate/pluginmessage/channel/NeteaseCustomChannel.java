@@ -40,14 +40,8 @@ public class NeteaseCustomChannel implements PluginMessageChannel {
     }
 
     @Override
-    public Result handleProxyCall(
-            byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
-            UUID sourceUuid,
-            String sourceUsername,
-            Identity sourceIdentity) {
+    public Result handleProxyCall(byte[] data, UUID sourceUuid, String sourceUsername,
+                                  Identity sourceIdentity) {
         if (sourceIdentity == Identity.SERVER) {
             // send it to the client
             return Result.forward();

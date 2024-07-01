@@ -18,8 +18,6 @@ dependencies {
     implementation("com.github.onebeastchris.cloud-minecraft", "cloud-paper", "jitpack-SNAPSHOT")
     // hack to make pre 1.12 work
     implementation("com.google.guava", "guava", guavaVersion)
-    implementation("com.google.code.gson", "gson", gsonVersion)
-
 
     compileOnlyApi("dev.folia", "folia-api", Versions.spigotVersion) {
         attributes {
@@ -34,7 +32,6 @@ relocate("org.incendo.cloud")
 relocate("io.leangen.geantyref") // used in cloud
 // hack to make pre 1.12 work
 relocate("com.google.common")
-relocate("com.google.gson")
 relocate("com.google.guava")
 // hack to make (old versions? of) Paper work
 relocate("it.unimi")
@@ -45,6 +42,4 @@ relocate("org.yaml")
 provided("com.mojang", "authlib", authlibVersion)
 provided("io.netty", "netty-transport", Versions.nettyVersion)
 provided("io.netty", "netty-codec", Versions.nettyVersion)
-//provided("com.google.code.gson", "gson", gsonVersion)
-provided("org.yaml", "snakeyaml", Versions.snakeyamlVersion)
 provided("com.google.code.gson", "gson", gsonVersion)

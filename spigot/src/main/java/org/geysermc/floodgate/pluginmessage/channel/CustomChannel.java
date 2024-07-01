@@ -43,8 +43,7 @@ public class CustomChannel implements PluginMessageChannel {
     }
 
     @Override
-    public Result handleProxyCall(byte[] data, UUID targetUuid, String targetUsername,
-                                  Identity targetIdentity, UUID sourceUuid, String sourceUsername,
+    public Result handleProxyCall(byte[] data, UUID sourceUuid, String sourceUsername,
                                   Identity sourceIdentity) {
         return null;
     }

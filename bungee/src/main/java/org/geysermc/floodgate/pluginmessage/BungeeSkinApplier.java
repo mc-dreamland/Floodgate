@@ -52,12 +52,6 @@ import org.geysermc.floodgate.util.ReflectionUtils;
 @Singleton
 public final class BungeeSkinApplier implements SkinApplier {
     private static final Field LOGIN_RESULT_FIELD;
-    public static final Constructor<?> LOGIN_RESULT_CONSTRUCTOR;
-    public static final Field LOGIN_RESULT_FIELD;
-    public static final Method SET_PROPERTIES_METHOD;
-
-    public static final Class<?> PROPERTY_CLASS;
-    public static final Constructor<?> PROPERTY_CONSTRUCTOR;
 
     static {
         LOGIN_RESULT_FIELD = getFieldOfType(InitialHandler.class, LoginResult.class);

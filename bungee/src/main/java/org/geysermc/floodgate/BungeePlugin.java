@@ -64,8 +64,6 @@ public final class BungeePlugin extends Plugin {
         long endCtm = System.currentTimeMillis();
         injector.getInstance(FloodgateLogger.class)
                 .translatedInfo("floodgate.core.finish", endCtm - ctm);
-
-
     }
 
     @Override
@@ -89,7 +87,6 @@ public final class BungeePlugin extends Plugin {
                 throwables.printStackTrace();
             }
         }
-
     }
 
     @Override

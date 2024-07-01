@@ -22,7 +22,6 @@ dependencyResolutionManagement {
 //            mavenContent { snapshotsOnly() }
 //        }
         maven("https://repo.papermc.io/repository/maven-public")
-        maven("https://repo.papermc.io/repository/maven-public/")
         // Spigot
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
             mavenContent { snapshotsOnly() }
@@ -38,9 +37,10 @@ dependencyResolutionManagement {
             mavenContent { releasesOnly() }
         }
 
-        maven("https://nexus.bjd-mc.com:8081/repository/maven-public/") {
-            isAllowInsecureProtocol = true
-        }
+//        maven("https://nexus.bjd-mc.com:8443/repository/maven-public/") {
+//            name = "bjdmc-repo"
+//            isAllowInsecureProtocol = true
+//        }
 
         mavenCentral()
 

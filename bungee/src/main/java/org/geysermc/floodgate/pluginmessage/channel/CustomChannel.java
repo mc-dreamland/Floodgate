@@ -41,15 +41,8 @@ public class CustomChannel implements PluginMessageChannel {
     }
 
     @Override
-    public Result handleProxyCall(
-            byte[] data,
-            UUID targetUuid,
-            String targetUsername,
-            Identity targetIdentity,
-            UUID sourceUuid,
-            String sourceUsername,
-            Identity sourceIdentity
-    ) {
+    public Result handleProxyCall(byte[] data, UUID sourceUuid, String sourceUsername,
+                                  Identity sourceIdentity) {
         ByteArrayDataInput in = ByteStreams.newDataInput(data);
         int packetId = in.readInt();
         String packetType = in.readUTF();
