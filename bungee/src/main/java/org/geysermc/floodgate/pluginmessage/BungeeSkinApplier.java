@@ -98,8 +98,6 @@ public final class BungeeSkinApplier implements SkinApplier {
         SkinData currentSkin = currentSkin(properties);
 
         SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
-        event.setCancelled(floodgatePlayer.isLinked());
-
         eventBus.fire(event);
 
         if (event.isCancelled()) {

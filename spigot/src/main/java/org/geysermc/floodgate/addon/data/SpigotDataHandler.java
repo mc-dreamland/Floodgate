@@ -29,6 +29,7 @@ import static org.geysermc.floodgate.util.ReflectionUtils.getCastedValue;
 import static org.geysermc.floodgate.util.ReflectionUtils.setValue;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import java.lang.reflect.InvocationTargetException;
@@ -38,9 +39,16 @@ import org.geysermc.floodgate.config.FloodgateConfig;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler;
 import org.geysermc.floodgate.player.FloodgateHandshakeHandler.HandshakeResult;
 import org.geysermc.floodgate.util.ClassNames;
+import org.geysermc.floodgate.util.Constants;
 import org.geysermc.floodgate.util.ProxyUtils;
 
 public final class SpigotDataHandler extends CommonDataHandler {
+    private static final Property DEFAULT_TEXTURE_PROPERTY = new Property(
+            "textures",
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_TEXTURE,
+            Constants.DEFAULT_MINECRAFT_JAVA_SKIN_SIGNATURE
+    );
+
     private Object networkManager;
     private FloodgatePlayer player;
     private boolean proxyData;
@@ -68,9 +76,9 @@ public final class SpigotDataHandler extends CommonDataHandler {
             // 1.20.2 and above
             try {
                 Object[] components = new Object[]{
-                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
-                    hostname,
                     ClassNames.HANDSHAKE_PROTOCOL.get(handshakePacket),
+                    hostname,
+                    ClassNames.HANDSHAKE_PORT.get(handshakePacket),
                     ClassNames.HANDSHAKE_INTENTION.get(handshakePacket)
                 };
 
@@ -167,31 +175,42 @@ public final class SpigotDataHandler extends CommonDataHandler {
                 }
             }
 
-            // set the player his GameProfile, we can't change the username without this
             GameProfile gameProfile = new GameProfile(
                     player.getCorrectUniqueId(), player.getCorrectUsername()
             );
-            setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
+
+            if (!player.isLinked()) {
+                // Otherwise game server will try to fetch the skin from Mojang.
+                // No need to worry that this overrides proxy data, because those won't reach this
+                // method / are already removed (in the case of username validation)
+                gameProfile.getProperties().put("textures", DEFAULT_TEXTURE_PROPERTY);
+            }
 
             // we have to fake the offline player (login) cycle
-            // just like on Spigot:
-
-            Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
 
             if (ClassNames.IS_PRE_1_20_2) {
                 // 1.20.1 and below
-
-                // LoginListener#initUUID
-                // new LoginHandler().fireEvents();
-
+                // - set profile, otherwise the username doesn't change
+                // - LoginListener#initUUID
+                // - new LoginHandler().fireEvents();
                 // and the tick of LoginListener will do the rest
 
+                Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
+                setValue(packetListener, ClassNames.LOGIN_PROFILE, gameProfile);
                 ClassNames.INIT_UUID.invoke(packetListener);
                 ClassNames.FIRE_LOGIN_EVENTS.invoke(loginHandler);
-            } else {
-                // 1.20.2 and above we directly register the profile
+            } else if (!ClassNames.IS_POST_LOGIN_HANDLER) {
+                // 1.20.2 until somewhere in 1.20.4 we can directly register the profile
 
+                Object loginHandler = ClassNames.LOGIN_HANDLER_CONSTRUCTOR.newInstance(packetListener);
                 ClassNames.FIRE_LOGIN_EVENTS_GAME_PROFILE.invoke(loginHandler, gameProfile);
+            } else {
+                // somewhere during 1.20.4 md_5 moved stuff to CraftBukkit
+
+                // LoginListener#callPlayerPreLoginEvents(GameProfile)
+                // LoginListener#startClientVerification(GameProfile)
+                ClassNames.CALL_PLAYER_PRE_LOGIN_EVENTS.invoke(packetListener, gameProfile);
+                ClassNames.START_CLIENT_VERIFICATION.invoke(packetListener, gameProfile);
             }
 
             ctx.pipeline().remove(this);

@@ -6,65 +6,112 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Get Release Info
+        id: release-info
+        uses: GeyserMC/actions/previous-release@master
+        with:
+          data: ${{ vars.RELEASEACTION_PREVRELEASE }}
+
       - name: Checkout repository and submodules
-        uses: actions/checkout@v3
+        # See https://github.com/actions/checkout/commits
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v3
+      - name: Validate Gradle Wrapper
+        # See https://github.com/gradle/wrapper-validation-action/commits
+        uses: gradle/actions/wrapper-validation@db19848a5fa7950289d3668fb053140cf3028d43 # v3.3.2
+
+      - name: Setup Java
+        # See https://github.com/actions/setup-java/commits
+        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
         with:
           java-version: 17
           distribution: temurin
 
-      - name: Build
-        uses: gradle/gradle-build-action@v2
+      - name: Setup Gradle
+        # See https://github.com/gradle/actions/commits
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
         with:
-          arguments: build
           cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
+        
+      - name: Build Floodgate
+        run: ./gradlew build
+        env:
+          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease }}
+
+      - name: Archive artifacts (Floodgate Bungee)
+        # See https://github.com/actions/upload-artifact/commits
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        if: success()
+        with:
+          name: Floodgate Bungee
+          path: bungee/build/libs/floodgate-bungee.jar
+          if-no-files-found: error
+
+      - name: Archive artifacts (Floodgate Spigot)
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        if: success()
+        with:
+          name: Floodgate Spigot
+          path: spigot/build/libs/floodgate-spigot.jar
+          if-no-files-found: error
+
+      - name: Archive artifacts (Floodgate Velocity)
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        if: success()
+        with:
+          name: Floodgate Velocity
+          path: velocity/build/libs/floodgate-velocity.jar
+          if-no-files-found: error
 
       - name: Publish to Maven Repository
         if: ${{ github.repository == 'GeyserMC/Floodgate' }}
-        uses: gradle/gradle-build-action@v2
+        run: ./gradlew publish
         env:
+          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease }}
           ORG_GRADLE_PROJECT_geysermcUsername: ${{ vars.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_geysermcPassword: ${{ secrets.DEPLOY_PASS }}
+
+      - name: Get Version
+        if: ${{ success() && github.repository == 'GeyserMC/Floodgate' && github.ref_name == 'master' }}
+        id: get-version
+        run: |
+          version=$(cat gradle.properties | grep -o "version=[0-9\\.]*" | cut -d"=" -f2)
+          echo "VERSION=${version}" >> $GITHUB_OUTPUT
+
+      - name: Get Release Metadata
+        if: ${{ success() && github.repository == 'GeyserMC/Floodgate' && github.ref_name == 'master' }}
+        uses: GeyserMC/actions/release@master
+        id: metadata
         with:
-          arguments: publish
-          cache-read-only: ${{ github.ref_name != 'master' && github.ref_name != 'development' }}
+          appID: ${{ secrets.RELEASE_APP_ID }}
+          appPrivateKey: ${{ secrets.RELEASE_APP_PK }}
+          files: |
+            bungee:bungee/build/libs/floodgate-bungee.jar
+            spigot:spigot/build/libs/floodgate-spigot.jar
+            velocity:velocity/build/libs/floodgate-velocity.jar
+          releaseEnabled: false
+          saveMetadata: true
+          releaseProject: 'floodgate'
+          releaseVersion: ${{ steps.get-version.outputs.VERSION }}
 
       - name: Publish to Downloads API
-        if: ${{ github.ref_name == 'master' && github.repository == 'GeyserMC/Floodgate' }}
-        shell: bash
-        env:
-          DOWNLOADS_USERNAME: ${{ vars.DOWNLOADS_USERNAME }}
-          DOWNLOADS_PRIVATE_KEY: ${{ secrets.DOWNLOADS_PRIVATE_KEY }}
-          DOWNLOADS_SERVER_IP: ${{ secrets.DOWNLOADS_SERVER_IP }}
-        run: |
-          # Save the private key to a file
-          echo "$DOWNLOADS_PRIVATE_KEY" > id_ecdsa
-          chmod 600 id_ecdsa
-          
-          # Set the project
-          project=floodgate
-
-          # Get the version from gradle.properties
-          version=$(cat gradle.properties | grep -o "version=[0-9\\.]*" | cut -d"=" -f2)
-          
-          # Create the build folder
-          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP mkdir -p "~/uploads/$project/$GITHUB_RUN_NUMBER/"
-
-          # Copy over artifacts
-          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" **/build/libs/floodgate-*.jar $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$project/$GITHUB_RUN_NUMBER/
-
-          # Remove un-needed artifacts
-          ssh -o StrictHostKeyChecking=no -i id_ecdsa $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP rm ./uploads/$project/$GITHUB_RUN_NUMBER/floodgate-api.jar ./uploads/$project/$GITHUB_RUN_NUMBER/floodgate-core.jar
-
-          # Push the metadata
-          echo "{\"project\": \"$project\", \"version\": \"$version\", \"id\": $GITHUB_RUN_NUMBER, \"commit\": \"$GITHUB_SHA\"}" > metadata.json
-          rsync -P -e "ssh -o StrictHostKeyChecking=no -i id_ecdsa" metadata.json $DOWNLOADS_USERNAME@$DOWNLOADS_SERVER_IP:~/uploads/$project/$GITHUB_RUN_NUMBER/
+        if: ${{ success() && github.ref_name == 'master' && github.repository == 'GeyserMC/Floodgate' }}
+        uses: GeyserMC/actions/upload-release@master
+        with:
+          username: ${{ vars.DOWNLOADS_USERNAME }}
+          privateKey: ${{ secrets.DOWNLOADS_PRIVATE_KEY }}
+          host: ${{ secrets.DOWNLOADS_SERVER_IP }}
+          files: |
+            bungee/build/libs/floodgate-bungee.jar
+            spigot/build/libs/floodgate-spigot.jar
+            velocity/build/libs/floodgate-velocity.jar
 
       - name: Notify Discord
         if: ${{ (success() || failure()) && github.repository == 'GeyserMC/Floodgate' }}
-        uses: Tim203/actions-git-discord-webhook@main
+        uses: GeyserMC/actions/notify-discord@master
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          discordWebhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          body: ${{ steps.metadata.outputs.body }}
