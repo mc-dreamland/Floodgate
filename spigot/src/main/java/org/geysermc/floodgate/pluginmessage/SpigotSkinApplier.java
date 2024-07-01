@@ -25,32 +25,31 @@
 
 package org.geysermc.floodgate.pluginmessage;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.geysermc.floodgate.SpigotPlugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent;
+import org.geysermc.floodgate.api.event.skin.SkinApplyEvent.SkinData;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.geysermc.floodgate.event.EventBus;
+import org.geysermc.floodgate.event.skin.SkinApplyEventImpl;
 import org.geysermc.floodgate.skin.SkinApplier;
-import org.geysermc.floodgate.skin.SkinData;
 import org.geysermc.floodgate.util.ClassNames;
 import org.geysermc.floodgate.util.ReflectionUtils;
 import org.geysermc.floodgate.util.SpigotVersionSpecificMethods;
 
+@Singleton
 public final class SpigotSkinApplier implements SkinApplier {
-    private final SpigotVersionSpecificMethods versionSpecificMethods;
-    private final SpigotPlugin plugin;
-
-    public SpigotSkinApplier(
-            SpigotVersionSpecificMethods versionSpecificMethods,
-            SpigotPlugin plugin) {
-        this.versionSpecificMethods = versionSpecificMethods;
-        this.plugin = plugin;
-    }
+    @Inject private SpigotVersionSpecificMethods versionSpecificMethods;
+    @Inject private EventBus eventBus;
 
     @Override
-    public void applySkin(FloodgatePlayer floodgatePlayer, SkinData skinData) {
+    public void applySkin(@NonNull FloodgatePlayer floodgatePlayer, @NonNull SkinData skinData) {
         applySkin0(floodgatePlayer, skinData, true);
     }
 
@@ -60,9 +59,10 @@ public final class SpigotSkinApplier implements SkinApplier {
         // player is probably not logged in yet
         if (player == null) {
             if (firstTry) {
-                Bukkit.getScheduler().runTaskLater(plugin,
+                versionSpecificMethods.schedule(
                         () -> applySkin0(floodgatePlayer, skinData, false),
-                        10 * 1000);
+                        10 * 20
+                );
             }
             return;
         }
@@ -73,20 +73,35 @@ public final class SpigotSkinApplier implements SkinApplier {
             throw new IllegalStateException("The GameProfile cannot be null! " + player.getName());
         }
 
+        // Need to be careful here - getProperties() returns an authlib PropertyMap, which extends
+        // MultiMap from Guava. Floodgate relocates Guava.
         PropertyMap properties = profile.getProperties();
 
-        properties.removeAll("textures");
-        Property property = new Property("textures", skinData.getValue(), skinData.getSignature());
-        properties.put("textures", property);
+        SkinData currentSkin = versionSpecificMethods.currentSkin(properties);
 
-        // By running as a task, we don't run into async issues
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
+        SkinApplyEvent event = new SkinApplyEventImpl(floodgatePlayer, currentSkin, skinData);
+        event.setCancelled(floodgatePlayer.isLinked());
+
+        eventBus.fire(event);
+
+        if (event.isCancelled()) {
+            return;
+        }
+
+        replaceSkin(properties, event.newSkin());
+
+        versionSpecificMethods.maybeSchedule(() -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (!p.equals(player) && p.canSee(player)) {
-                    versionSpecificMethods.hidePlayer(p, player);
-                    versionSpecificMethods.showPlayer(p, player);
+                    versionSpecificMethods.hideAndShowPlayer(p, player);
                 }
             }
         });
+    }
+
+    private void replaceSkin(PropertyMap properties, SkinData skinData) {
+        properties.removeAll("textures");
+        Property property = new Property("textures", skinData.value(), skinData.signature());
+        properties.put("textures", property);
     }
 }

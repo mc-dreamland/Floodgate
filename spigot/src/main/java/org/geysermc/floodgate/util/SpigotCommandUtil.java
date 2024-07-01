@@ -27,11 +27,10 @@ package org.geysermc.floodgate.util;
 
 import java.util.Collection;
 import java.util.UUID;
-import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.platform.command.CommandUtil;
@@ -42,19 +41,17 @@ import org.geysermc.floodgate.player.UserAudience.PlayerAudience;
 public final class SpigotCommandUtil extends CommandUtil {
     private final Server server;
     private final SpigotVersionSpecificMethods versionSpecificMethods;
-    private final JavaPlugin plugin;
     private UserAudience console;
 
     public SpigotCommandUtil(
             LanguageManager manager,
             Server server,
             FloodgateApi api,
-            SpigotVersionSpecificMethods versionSpecificMethods,
-            JavaPlugin plugin) {
+            SpigotVersionSpecificMethods versionSpecificMethods
+    ) {
         super(manager, api);
         this.server = server;
         this.versionSpecificMethods = versionSpecificMethods;
-        this.plugin = plugin;
     }
 
     @Override
@@ -120,17 +117,17 @@ public final class SpigotCommandUtil extends CommandUtil {
     public void kickPlayer(Object player, String message) {
         // can also be console
         if (player instanceof Player) {
-            Bukkit.getScheduler().runTask(plugin, () -> ((Player) player).kickPlayer(message));
+            versionSpecificMethods.schedule(() -> ((Player) player).kickPlayer(message), 0);
         }
     }
 
     @Override
     public boolean whitelistPlayer(UUID uuid, String username) {
-        return WhitelistUtils.addPlayer(uuid, username);
+        return WhitelistUtils.addPlayer(uuid, username, versionSpecificMethods);
     }
 
     @Override
     public boolean removePlayerFromWhitelist(UUID uuid, String username) {
-        return WhitelistUtils.removePlayer(uuid, username);
+        return WhitelistUtils.removePlayer(uuid, username, versionSpecificMethods);
     }
 }

@@ -28,9 +28,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.kotlin.dsl.the
 
-fun Project.isSnapshot(): Boolean =
-    version.toString().endsWith("-SNAPSHOT")
-
 fun Project.fullVersion(): String {
     var version = version.toString()
     if (version.endsWith("-SNAPSHOT")) {
@@ -42,14 +39,19 @@ fun Project.fullVersion(): String {
 fun Project.lastCommitHash(): String? =
     the<IndraGitExtension>().commit()?.name?.substring(0, 7)
 
-// retrieved from https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
-// some properties might be specific to Jenkins
 fun Project.branchName(): String =
-    System.getenv("GIT_BRANCH") ?: "local/dev"
-fun Project.buildNumber(): Int =
-    Integer.parseInt(System.getenv("BUILD_NUMBER") ?: "-1")
+    the<IndraGitExtension>().branchName() ?: jenkinsBranchName() ?: "local/dev"
 
-fun Project.buildNumberAsString(): String =
+fun Project.shouldAddBranchName(): Boolean =
+    System.getenv("IGNORE_BRANCH")?.toBoolean() ?: (branchName() !in arrayOf("master", "local/dev"))
+
+fun Project.versionWithBranchName(): String =
+    branchName().replace(Regex("[^0-9A-Za-z-_]"), "-") + '-' + version
+
+fun buildNumber(): Int =
+    (System.getenv("GITHUB_RUN_NUMBER") ?: jenkinsBuildNumber())?.let { Integer.parseInt(it) } ?: -1
+
+fun buildNumberAsString(): String =
     buildNumber().takeIf { it != -1 }?.toString() ?: "??"
 
 val providedDependencies = mutableMapOf<String, MutableSet<Pair<String, Any>>>()
@@ -77,3 +79,7 @@ fun Project.relocate(pattern: String) =
 
 private fun calcExclusion(section: String, bit: Int, excludedOn: Int): String =
     if (excludedOn and bit > 0) section else ""
+
+// todo remove these when we're not using Jenkins anymore
+private fun jenkinsBranchName(): String? = System.getenv("BRANCH_NAME")
+private fun jenkinsBuildNumber(): String? = System.getenv("BUILD_NUMBER")

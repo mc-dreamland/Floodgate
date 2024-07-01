@@ -1,9 +1,10 @@
+@file:Suppress("UnstableApiUsage")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-//        mavenLocal()
+        mavenLocal()
 
         // Geyser, Cumulus etc.
         maven("https://repo.opencollab.dev/maven-releases") {
@@ -14,7 +15,13 @@ dependencyResolutionManagement {
         }
 
         // Paper, Velocity
-        maven("https://papermc.io/repo/repository/maven-public")
+//        maven("https://repo.papermc.io/repository/maven-releases") {
+//            mavenContent { releasesOnly() }
+//        }
+//        maven("https://repo.papermc.io/repository/maven-snapshots") {
+//            mavenContent { snapshotsOnly() }
+//        }
+        maven("https://repo.papermc.io/repository/maven-public")
         maven("https://repo.papermc.io/repository/maven-public/")
         // Spigot
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots") {
@@ -48,7 +55,8 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        id("net.kyori.blossom") version "1.2.0"
+        id("net.kyori.indra")
+        id("net.kyori.indra.git")
     }
     includeBuild("build-logic")
 }
@@ -56,6 +64,7 @@ pluginManagement {
 rootProject.name = "floodgate-parent"
 
 include(":api")
+include(":ap")
 include(":core")
 include(":bungee")
 include(":spigot")

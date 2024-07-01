@@ -1,12 +1,13 @@
-import net.kyori.blossom.BlossomExtension
-
 plugins {
-    id("net.kyori.blossom")
+    id("floodgate.generate-templates")
 }
 
 dependencies {
     api(projects.api)
     api("org.geysermc.configutils", "configutils", Versions.configUtilsVersion)
+
+    compileOnly(projects.ap)
+    annotationProcessor(projects.ap)
 
     api("com.google.inject", "guice", Versions.guiceVersion)
     api("com.nukkitx.fastutil", "fastutil-short-object-maps", Versions.fastutilVersion)
@@ -17,6 +18,9 @@ dependencies {
     api("org.bstats", "bstats-base", Versions.bstatsVersion)
     api("org.msgpack", "msgpack", Versions.msgpackVersion)
     api("com.zaxxer", "HikariCP", "4.0.3")
+
+    //todo use official dependency once https://github.com/Bastian/bstats-metrics/pull/118 is merged
+    api("com.github.Konicai.bstats-metrics", "bstats-base", Versions.bstatsVersion)
 }
 
 // present on all platforms
@@ -27,9 +31,10 @@ provided("io.netty", "netty-codec", Versions.nettyVersion)
 relocate("org.bstats")
 relocate("org.msgpack")
 
-configure<BlossomExtension> {
-    val constantsFile = "src/main/java/org/geysermc/floodgate/util/Constants.java"
-    replaceToken("\${floodgateVersion}", fullVersion(), constantsFile)
-    replaceToken("\${branch}", branchName(), constantsFile)
-    replaceToken("\${buildNumber}", buildNumber(), constantsFile)
+tasks {
+    templateSources {
+        replaceToken("floodgateVersion", fullVersion())
+        replaceToken("branch", branchName())
+        replaceToken("buildNumber", buildNumber())
+    }
 }
